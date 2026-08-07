@@ -33,7 +33,7 @@ export function Navbar() {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
-              email: session.user.email,
+              email: session?.user?.email,
               localScore: currentLocalXp 
             }),
             cache: 'no-store'
