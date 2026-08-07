@@ -12,8 +12,12 @@ interface UserState {
   completedChallenges: string[];
   
   // Actions
-  addXP: (amount: number) => void;
-  updateStats: (stats: Partial<Omit<UserState, 'addXP' | 'updateStats' | 'completeChallenge' | 'unlockArea' | 'reset'>>) => void;
+  // Actions
+addXP: (amount: number) => void;
+updateStats: (stats: Partial<Omit<UserState, 'addXP' | 'updateStats' | 'completeChallenge' | 'unlockArea' | 'reset'>>) => void;
+completeChallenge: (id: string, xpReward: number) => void;
+unlockArea: (areaId: string) => void;
+reset: () => void;
 }
 
 export const useStore = create<UserState>()(
@@ -35,7 +39,7 @@ export const useStore = create<UserState>()(
   
   updateStats: (stats) => set((state) => ({ ...state, ...stats })),
   
-  completeChallenge: (id, xpReward) => set((state) => {
+  completeChallenge: (id: string, xpReward: number) => set((state) => {
     if (state.completedChallenges.includes(id)) return state;
     
     const newXp = state.xp + xpReward;
@@ -46,7 +50,7 @@ export const useStore = create<UserState>()(
     };
   }),
 
-  unlockArea: (areaId) => set((state) => {
+  unlockArea: (areaId: string) => set((state) => {
     if (state.unlockedAreas.includes(areaId)) return state;
     return { unlockedAreas: [...state.unlockedAreas, areaId] };
   }),
