@@ -13,10 +13,7 @@ interface UserState {
   
   // Actions
   addXP: (amount: number) => void;
-  updateStats: (stats: Partial<Omit<UserState, 'ecoScore' | 'xp' | 'unlockedAreas' | 'completedChallenges' | 'addXP' | 'updateStats' | 'completeChallenge' | 'unlockArea' | 'reset'>>) => void;
-  completeChallenge: (id: string, xpReward: number) => void;
-  unlockArea: (areaId: string) => void;
-  reset: () => void;
+  updateStats: (stats: Partial<Omit<UserState, 'addXP' | 'updateStats' | 'completeChallenge' | 'unlockArea' | 'reset'>>) => void;
 }
 
 export const useStore = create<UserState>()(
