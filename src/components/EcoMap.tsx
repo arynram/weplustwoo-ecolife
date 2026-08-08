@@ -184,7 +184,7 @@ function Scene({ selectedLocation, setSelectedLocation, unlockedAreas }: any) {
   );
 }
 
-export function EcoMap({ forceFullscreen = false }: { forceFullscreen?: boolean }) {
+export function EcoMap({ forceFullscreen = false, isActive = true }: { forceFullscreen?: boolean, isActive?: boolean }) {
   const { xp, lifetimeXp, unlockedAreas } = useStore();
   const [selectedLocation, setSelectedLocation] = useState<typeof MAP_LOCATIONS[0] | null>(null);
   const [activeLevel, setActiveLevel] = useState<string | null>(null);
@@ -205,7 +205,7 @@ export function EcoMap({ forceFullscreen = false }: { forceFullscreen?: boolean 
   const isEffectivelyFullscreen = isFullscreen || forceFullscreen;
 
   useEffect(() => {
-    if (isEffectivelyFullscreen) {
+    if (isEffectivelyFullscreen && isActive) {
       document.body.style.overflow = 'hidden';
       setIsFocused(true);
     } else {
@@ -214,7 +214,7 @@ export function EcoMap({ forceFullscreen = false }: { forceFullscreen?: boolean 
     return () => {
       document.body.style.overflow = 'unset';
     };
-  }, [isEffectivelyFullscreen]);
+  }, [isEffectivelyFullscreen, isActive]);
 
 
   return (

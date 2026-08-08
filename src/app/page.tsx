@@ -43,7 +43,7 @@ export default function Home() {
           </button>
         </div>
         <div className="flex-1 w-full relative">
-          <EcoMap forceFullscreen={true} />
+          <EcoMap forceFullscreen={true} isActive={activeFeature === 'map'} />
         </div>
       </div>
 
