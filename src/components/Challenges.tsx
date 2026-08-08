@@ -6,11 +6,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Bike, TreeDeciduous, LightbulbOff, Trash2, Droplet, Recycle, 
   CheckCircle, Lock, Upload, X, Clock,
-  Coffee, Bus, Search, ShoppingBag, Leaf, Droplets, BatteryCharging, Factory, Zap
+  Coffee, Bus, Search, ShoppingBag, Leaf, Droplets, BatteryCharging, Factory, Zap, Star
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 const CHALLENGES_DATA = [
+  // Sample / Demo
+  { id: 'demo_sample', title: '🎯 Sample Eco Challenge', xp: 1000, envRewards: {}, icon: <Star className="w-8 h-8 text-yellow-400" />, desc: 'Complete this sample challenge to get EP and try the Eco Map.', reqRank: 0, question: 'Are you ready to restore the environment?' },
   // Original 6
   { id: 'bike', title: 'Ride a Bicycle', xp: 20, envRewards: { carbonSaved: 5 }, icon: <Bike className="w-8 h-8" />, desc: 'Use a bicycle for your daily commute instead of a car.', reqRank: 0, question: 'How many kilometers did you ride today?' },
   { id: 'tree', title: 'Plant a Tree', xp: 50, envRewards: { treesSaved: 1 }, icon: <TreeDeciduous className="w-8 h-8" />, desc: 'Plant a tree in your local community or garden.', reqRank: 0, question: 'What type of tree did you plant?' },

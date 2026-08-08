@@ -51,6 +51,7 @@ export function Navbar() {
                 challengeCompletions: Object.fromEntries(
                   Object.entries(data.challengeCompletions || {}).map(([k, v]) => [k, new Date(v as string).getTime()])
                 ),
+                completedLevels: data.completedLevels || [],
                 unlockedAreas: data.unlockedAreas,
                 carbonSaved: data.carbonSaved || 0,
                 treesSaved: data.treesSaved || 0,

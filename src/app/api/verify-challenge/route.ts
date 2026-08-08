@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
             $addToSet: { completedChallenges: challengeId },
             $set: { [`challengeCompletions.${challengeId}`]: new Date() }
           },
-          { new: true } // Return updated doc
+          { returnDocument: 'after' } // Return updated doc
         );
 
         if (!updatedUser) {

@@ -8,17 +8,25 @@ export async function GET() {
   try {
     await connectToDatabase();
 
-    // Fetch top 50 users sorted by score descending
-    const users = await User.find({})
-      .sort({ score: -1 })
-      .limit(50)
-      .select('name score avatar'); // Only send necessary fields
+    // Fetch top 50 users sorted by number of completed levels descending
+    const users = await User.aggregate([
+      {
+        $project: {
+          name: 1,
+          avatar: 1,
+          score: 1,
+          completedLevelsCount: { $size: { $ifNull: ["$completedLevels", []] } }
+        }
+      },
+      { $sort: { completedLevelsCount: -1, score: -1 } },
+      { $limit: 50 }
+    ]);
 
     // Add rank and format to match our frontend type
     const leaderboardData = users.map((user, index) => ({
       id: user._id.toString(),
       name: user.name,
-      score: user.score,
+      score: user.completedLevelsCount, // Pass the level count as score to the frontend (to reuse the component type)
       avatar: user.avatar,
       rank: index + 1,
     }));

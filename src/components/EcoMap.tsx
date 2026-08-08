@@ -173,7 +173,7 @@ function Scene({ selectedLocation, setSelectedLocation, unlockedAreas }: any) {
                   : 'bg-slate-100 text-slate-400 border-2 border-slate-200'
                 }
               `}>
-                {isUnlocked ? loc.name : `🔒 Need ${loc.reqXp} EP`}
+                {isUnlocked ? loc.name : `🔒 Complete previous level`}
               </div>
             </Html>
           </group>
@@ -192,15 +192,6 @@ export function EcoMap() {
   
   const ref = useRef(null);
   const isInView = useInView(ref, { margin: "200px" });
-
-  // Check and unlock areas based on EP
-  useEffect(() => {
-    MAP_LOCATIONS.forEach(loc => {
-      if (currentLifetime >= loc.reqXp && !unlockedAreas.includes(loc.id)) {
-        unlockArea(loc.id);
-      }
-    });
-  }, [currentLifetime, unlockedAreas, unlockArea]);
 
   return (
     <div ref={ref} className="w-full h-125 md:h-150 relative rounded-[3rem] overflow-hidden border-4 border-sky-300 shadow-[0_10px_40px_-10px_rgba(56,189,248,0.5)] bg-sky-200">

@@ -12,6 +12,7 @@ interface UserState {
   unlockedAreas: string[];
   completedChallenges: string[];
   challengeCompletions: Record<string, number>;
+  completedLevels: string[];
   restoredObjects: Record<string, boolean>;
 
   // Actions
@@ -35,6 +36,7 @@ interface UserState {
     }
   ) => void;
   unlockArea: (areaId: string) => void;
+  completeLevel: (levelId: string, email?: string) => void;
   restoreObject: (objectId: string, cost: number) => void;
   reset: () => void;
 }
@@ -52,6 +54,7 @@ export const useStore = create<UserState>()(
       unlockedAreas: ['home'],
       completedChallenges: [],
       challengeCompletions: {},
+      completedLevels: [],
       restoredObjects: {},
 
       addXP: (amount) =>
@@ -95,10 +98,47 @@ export const useStore = create<UserState>()(
         }),
 
       unlockArea: (areaId) =>
+        set((state) => ({
+          unlockedAreas: state.unlockedAreas.includes(areaId)
+            ? state.unlockedAreas
+            : [...state.unlockedAreas, areaId],
+        })),
+
+      completeLevel: async (levelId: string, email?: string) => {
         set((state) => {
-          if (state.unlockedAreas.includes(areaId)) return state;
-          return { unlockedAreas: [...state.unlockedAreas, areaId] };
-        }),
+          if (state.completedLevels.includes(levelId)) return state;
+          
+          const nextLevelMap: Record<string, string> = {
+            home: 'forest',
+            forest: 'solar',
+            solar: 'wind',
+            wind: ''
+          };
+          const nextLevelId = nextLevelMap[levelId];
+          const newUnlocked = [...state.unlockedAreas];
+          if (nextLevelId && !newUnlocked.includes(nextLevelId)) {
+            newUnlocked.push(nextLevelId);
+          }
+
+          return {
+            completedLevels: [...state.completedLevels, levelId],
+            unlockedAreas: newUnlocked
+          };
+        });
+
+        // Persist to backend if logged in
+        if (email) {
+          try {
+            await fetch('/api/complete-level', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email, levelId })
+            });
+          } catch (e) {
+            console.error('Failed to complete level on server');
+          }
+        }
+      },
 
       restoreObject: (objectId, cost) =>
         set((state) => {
@@ -125,6 +165,7 @@ export const useStore = create<UserState>()(
           unlockedAreas: ['home'],
           completedChallenges: [],
           challengeCompletions: {},
+          completedLevels: [],
           restoredObjects: {},
         }),
     }),

@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useStore } from '@/store/useStore';
 import { X, Play, Heart, Sprout } from 'lucide-react';
+import { useSession } from 'next-auth/react';
+import { useEffect } from 'react';
 
 interface RestorationObject {
   id: string;
@@ -213,7 +215,8 @@ const SmokeSprite = ({ isRestored }: { isRestored: boolean }) => (
 // --- Main Component ---
 
 export default function RestorationLevel({ levelId, onClose, onNextLevel }: { levelId: string, onClose: () => void, onNextLevel?: (nextId: string) => void }) {
-  const { xp, restoredObjects, restoreObject } = useStore();
+  const { data: session } = useSession();
+  const { xp, restoredObjects, restoreObject, completeLevel } = useStore();
   const [activeObject, setActiveObject] = useState<RestorationObject | null>(null);
   const [storyActive, setStoryActive] = useState(true);
 
@@ -224,6 +227,12 @@ export default function RestorationLevel({ levelId, onClose, onNextLevel }: { le
   const totalObjects = level.objects.length;
   const progressPercent = Math.round((restoredCount / totalObjects) * 100);
   const isComplete = restoredCount === totalObjects;
+
+  useEffect(() => {
+    if (isComplete) {
+      completeLevel(levelId, session?.user?.email || undefined);
+    }
+  }, [isComplete, levelId, completeLevel, session?.user?.email]);
 
   const handleRestore = () => {
     if (activeObject && xp >= activeObject.cost && !restoredObjects[activeObject.id]) {

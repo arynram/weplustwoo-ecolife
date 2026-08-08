@@ -29,6 +29,7 @@ export async function POST(req: Request) {
       score: user.score,
       completedChallenges: user.completedChallenges || [],
       challengeCompletions: user.challengeCompletions || {},
+      completedLevels: user.completedLevels || [],
       unlockedAreas: user.unlockedAreas || ['home'],
       carbonSaved: user.carbonSaved || 0,
       treesSaved: user.treesSaved || 0,

@@ -58,8 +58,11 @@ export default function LeaderboardPage() {
             <Trophy className="h-10 w-10 text-yellow-400" />
             Global Eco Leaderboard
           </h1>
-          <p className="text-gray-300 max-w-2xl mx-auto text-lg">
+          <p className="text-gray-300 max-w-2xl mx-auto text-lg mb-2">
             See how you rank against other eco-warriors around the world. Keep completing challenges to climb the ranks!
+          </p>
+          <p className="text-emerald-400 font-bold text-xl">
+            Ranked by Eco Levels Completed
           </p>
         </div>
 
@@ -79,7 +82,7 @@ export default function LeaderboardPage() {
                       {rank2.avatar}
                     </div>
                     <div className="text-gray-200 font-medium mb-2">{rank2.name}</div>
-                    <div className="text-emerald-400 font-bold mb-4">{rank2.score.toLocaleString()} EP</div>
+                    <div className="text-emerald-400 font-bold mb-4">{rank2.score.toLocaleString()} Levels Completed</div>
                     <div className="w-32 h-32 bg-gradient-to-t from-gray-400/20 to-gray-300/10 rounded-t-lg border-t-2 border-gray-400/50 flex justify-center items-start pt-4">
                       <span className="text-4xl font-bold text-gray-400">2</span>
                     </div>
@@ -98,7 +101,7 @@ export default function LeaderboardPage() {
                       </div>
                     </div>
                     <div className="text-gray-100 font-bold mb-2">{rank1.name}</div>
-                    <div className="text-emerald-400 font-bold mb-4 text-lg">{rank1.score.toLocaleString()} EP</div>
+                    <div className="text-emerald-400 font-bold mb-4 text-lg">{rank1.score.toLocaleString()} Levels Completed</div>
                     <div className="w-40 h-40 bg-gradient-to-t from-yellow-500/20 to-yellow-400/10 rounded-t-lg border-t-2 border-yellow-400/50 flex justify-center items-start pt-4">
                       <span className="text-5xl font-bold text-yellow-500">1</span>
                     </div>
@@ -112,7 +115,7 @@ export default function LeaderboardPage() {
                       {rank3.avatar}
                     </div>
                     <div className="text-gray-200 font-medium mb-2">{rank3.name}</div>
-                    <div className="text-emerald-400 font-bold mb-4">{rank3.score.toLocaleString()} EP</div>
+                    <div className="text-emerald-400 font-bold mb-4">{rank3.score.toLocaleString()} Levels Completed</div>
                     <div className="w-32 h-24 bg-gradient-to-t from-amber-700/20 to-amber-600/10 rounded-t-lg border-t-2 border-amber-600/50 flex justify-center items-start pt-4">
                       <span className="text-4xl font-bold text-amber-600">3</span>
                     </div>
@@ -128,7 +131,7 @@ export default function LeaderboardPage() {
                     <tr className="bg-white/5 border-b border-white/10">
                       <th className="p-4 font-semibold text-gray-300 text-center w-20">Rank</th>
                       <th className="p-4 font-semibold text-gray-300">Eco Warrior</th>
-                      <th className="p-4 font-semibold text-gray-300 text-right">Score (EP)</th>
+                      <th className="p-4 font-semibold text-gray-300 text-right">Levels Completed</th>
                     </tr>
                   </thead>
                   <tbody>
