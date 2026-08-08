@@ -10,9 +10,9 @@ const CHALLENGES_DATA = [
   { id: 'bike', title: 'Ride a Bicycle', xp: 20, envRewards: { carbonSaved: 5 }, icon: <Bike className="w-8 h-8" />, desc: 'Use a bicycle for your daily commute instead of a car.', reqRank: 0, question: 'How many kilometers did you ride today?' },
   { id: 'tree', title: 'Plant a Tree', xp: 50, envRewards: { treesSaved: 1 }, icon: <TreeDeciduous className="w-8 h-8" />, desc: 'Plant a tree in your local community or garden.', reqRank: 0, question: 'What type of tree did you plant?' },
   { id: 'light', title: 'Save Electricity', xp: 15, envRewards: { carbonSaved: 2 }, icon: <LightbulbOff className="w-8 h-8" />, desc: 'Turn off all unnecessary lights for 24 hours.', reqRank: 0, question: 'Which appliances did you unplug?' },
-  { id: 'plastic', title: 'Avoid Plastic', xp: 30, envRewards: { plasticReduced: 3 }, icon: <Trash2 className="w-8 h-8" />, desc: 'Go completely single-use plastic free for 3 days.', reqRank: 100, question: 'What alternatives to plastic did you use?' },
-  { id: 'water', title: 'Save Water', xp: 25, envRewards: { waterSaved: 50 }, icon: <Droplet className="w-8 h-8" />, desc: 'Limit your showers to 5 minutes for a week.', reqRank: 100, question: 'How many liters of water do you estimate you saved?' },
-  { id: 'recycle', title: 'Recycle Waste', xp: 35, envRewards: { plasticReduced: 5 }, icon: <Recycle className="w-8 h-8" />, desc: 'Properly segregate and recycle all household waste.', reqRank: 200, question: 'What materials did you segregate today?' },
+  { id: 'plastic', title: 'Avoid Plastic', xp: 30, envRewards: { plasticReduced: 3 }, icon: <Trash2 className="w-8 h-8" />, desc: 'Go completely single-use plastic free for 3 days.', reqRank: 0, question: 'What alternatives to plastic did you use?' },
+  { id: 'water', title: 'Save Water', xp: 25, envRewards: { waterSaved: 50 }, icon: <Droplet className="w-8 h-8" />, desc: 'Limit your showers to 5 minutes for a week.', reqRank: 0, question: 'How many liters of water do you estimate you saved?' },
+  { id: 'recycle', title: 'Recycle Waste', xp: 35, envRewards: { plasticReduced: 5 }, icon: <Recycle className="w-8 h-8" />, desc: 'Properly segregate and recycle all household waste.', reqRank: 0, question: 'What materials did you segregate today?' },
 ];
 
 export function Challenges() {
@@ -24,6 +24,7 @@ export function Challenges() {
   const [activeChallenge, setActiveChallenge] = useState<typeof CHALLENGES_DATA[0] | null>(null);
   const [answer, setAnswer] = useState('');
   const [video, setVideo] = useState<File | null>(null);
+  const [declaration, setDeclaration] = useState(false);
   
   // AI Verification States
   const [isVerifying, setIsVerifying] = useState(false);
@@ -31,16 +32,19 @@ export function Challenges() {
 
   const handleSubmitVerification = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!activeChallenge || !video) return;
+    if (!activeChallenge || !declaration) return;
     
     setIsVerifying(true);
     setVerificationError(null);
 
     try {
       const formData = new FormData();
-      formData.append('video', video);
+      if (video) {
+        formData.append('video', video);
+      }
       formData.append('challengeTitle', activeChallenge.title);
       formData.append('challengeId', activeChallenge.id);
+      formData.append('declaration', 'true');
       if (session?.user?.email) {
         formData.append('email', session.user.email);
       }
@@ -238,7 +242,23 @@ export function Challenges() {
                       )}
                     </label>
                   </div>
+                  <div className="flex items-start gap-3 p-4 bg-white/5 border border-white/10 rounded-xl">
+                    <input
+                      type="checkbox"
+                      id="declaration"
+                      checked={declaration}
+                      onChange={(e) => setDeclaration(e.target.checked)}
+                      required
+                      className="mt-1 w-4 h-4 accent-emerald-500"
+                    />
 
+                    <label
+                      htmlFor="declaration"
+                      className="text-sm text-emerald-100/80 cursor-pointer"
+                    >
+                      I confirm that I am providing correct and truthful information about this challenge.
+                    </label>
+                  </div>
                   {verificationError && (
                     <div className="p-4 bg-red-500/20 border border-red-500/50 rounded-xl text-red-200 text-sm">
                       <p className="font-bold mb-1">Verification Failed</p>
@@ -248,7 +268,7 @@ export function Challenges() {
 
                   <button
                     type="submit"
-                    disabled={!answer || !video || isVerifying}
+                    disabled={!answer || !declaration || isVerifying}
                     className="w-full py-4 bg-emerald-500 hover:bg-emerald-400 disabled:bg-white/10 disabled:text-gray-500 text-white font-bold rounded-xl transition-all disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     {isVerifying ? (
@@ -257,7 +277,7 @@ export function Challenges() {
                         Analyzing video with AI...
                       </>
                     ) : (
-                      'Submit Proof & Claim EP'
+                      'Submit & Claim EP'
                     )}
                   </button>
                 </form>
