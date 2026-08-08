@@ -28,6 +28,7 @@ export async function POST(req: Request) {
     return NextResponse.json({
       score: user.score,
       completedChallenges: user.completedChallenges || [],
+      challengeCompletions: user.challengeCompletions || {},
       unlockedAreas: user.unlockedAreas || ['home'],
       carbonSaved: user.carbonSaved || 0,
       treesSaved: user.treesSaved || 0,

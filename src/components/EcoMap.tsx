@@ -7,6 +7,7 @@ import { OrbitControls, Sky, Html, Float, Line } from '@react-three/drei';
 import * as THREE from 'three';
 import { MapPin, TreePine, Sun, Wind, Lock, Navigation } from 'lucide-react';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
+import RestorationLevel from './RestorationLevel';
 
 const MAP_LOCATIONS = [
   { id: 'home', name: '🏡 Happy Village', pos: [7, 1, 7], icon: <MapPin />, reqXp: 0, description: 'Your cozy starting point! Learn fun eco habits here.' },
@@ -44,7 +45,7 @@ function Mountain() {
   );
 }
 
-function Player({ xp }: { xp: number }) {
+function Player({ lifetimeXp }: { lifetimeXp: number }) {
   const ref = useRef<THREE.Group>(null);
   
   useFrame((state) => {
@@ -55,11 +56,11 @@ function Player({ xp }: { xp: number }) {
     const tTargets = [0, 2/6, 4/6, 1];
 
     for (let i = 0; i < 3; i++) {
-      if (xp >= xpTargets[i] && xp < xpTargets[i+1]) {
-        const progress = (xp - xpTargets[i]) / (xpTargets[i+1] - xpTargets[i]);
+      if (lifetimeXp >= xpTargets[i] && lifetimeXp < xpTargets[i+1]) {
+        const progress = (lifetimeXp - xpTargets[i]) / (xpTargets[i+1] - xpTargets[i]);
         t = tTargets[i] + progress * (tTargets[i+1] - tTargets[i]);
         break;
-      } else if (xp >= 300) {
+      } else if (lifetimeXp >= 300) {
         t = 1;
       }
     }
@@ -183,8 +184,11 @@ function Scene({ selectedLocation, setSelectedLocation, unlockedAreas }: any) {
 }
 
 export function EcoMap() {
-  const { xp, unlockedAreas, unlockArea } = useStore();
+  const { xp, lifetimeXp, unlockedAreas, unlockArea } = useStore();
   const [selectedLocation, setSelectedLocation] = useState<typeof MAP_LOCATIONS[0] | null>(null);
+  const [activeLevel, setActiveLevel] = useState<string | null>(null);
+  
+  const currentLifetime = lifetimeXp ?? xp; // Fallback for migration
   
   const ref = useRef(null);
   const isInView = useInView(ref, { margin: "200px" });
@@ -192,11 +196,11 @@ export function EcoMap() {
   // Check and unlock areas based on EP
   useEffect(() => {
     MAP_LOCATIONS.forEach(loc => {
-      if (xp >= loc.reqXp && !unlockedAreas.includes(loc.id)) {
+      if (currentLifetime >= loc.reqXp && !unlockedAreas.includes(loc.id)) {
         unlockArea(loc.id);
       }
     });
-  }, [xp, unlockedAreas, unlockArea]);
+  }, [currentLifetime, unlockedAreas, unlockArea]);
 
   return (
     <div ref={ref} className="w-full h-125 md:h-150 relative rounded-[3rem] overflow-hidden border-4 border-sky-300 shadow-[0_10px_40px_-10px_rgba(56,189,248,0.5)] bg-sky-200">
@@ -211,7 +215,7 @@ export function EcoMap() {
         <Canvas shadows camera={{ position: [0, 8, 20], fov: 50 }}>
           <OrbitControls enablePan={false} minDistance={10} maxDistance={30} maxPolarAngle={Math.PI / 2 + 0.1} />
           <Scene selectedLocation={selectedLocation} setSelectedLocation={setSelectedLocation} unlockedAreas={unlockedAreas} />
-          <Player xp={xp} />
+          <Player lifetimeXp={currentLifetime} />
         </Canvas>
       )}
 
@@ -231,10 +235,29 @@ export function EcoMap() {
               <button onClick={() => setSelectedLocation(null)} className="text-sky-300 hover:text-sky-500 bg-sky-50 hover:bg-sky-100 rounded-full w-8 h-8 flex items-center justify-center font-bold transition-colors">✕</button>
             </div>
             <p className="text-sky-800 font-medium text-base mb-6 leading-relaxed">{selectedLocation.description}</p>
-            <button className="w-full py-4 bg-linear-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-white font-extrabold rounded-2xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 text-lg flex items-center justify-center gap-2">
+            <button 
+              onClick={() => {
+                setActiveLevel(selectedLocation.id);
+                setSelectedLocation(null);
+              }}
+              className="w-full py-4 bg-linear-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-white font-extrabold rounded-2xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 text-lg flex items-center justify-center gap-2"
+            >
               Let's Go! 🚀
             </button>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* 2D Minigame Overlay */}
+      <AnimatePresence>
+        {activeLevel && (
+          <RestorationLevel 
+            levelId={activeLevel} 
+            onClose={() => setActiveLevel(null)} 
+            onNextLevel={(nextId) => {
+              setActiveLevel(nextId);
+            }}
+          />
         )}
       </AnimatePresence>
     </div>

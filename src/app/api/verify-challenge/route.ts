@@ -49,6 +49,7 @@ export async function POST(req: NextRequest) {
       if (email && xp > 0) {
         await connectToDatabase();
 
+        const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
         const incData: any = { score: xp };
 
         if (envRewards && Object.keys(envRewards).length > 0) {
@@ -61,13 +62,30 @@ export async function POST(req: NextRequest) {
           }
         }
 
-        await User.findOneAndUpdate(
-          { email },
+        const updatedUser = await User.findOneAndUpdate(
+          {
+            email,
+            $or: [
+              { [`challengeCompletions.${challengeId}`]: { $exists: false } },
+              { [`challengeCompletions.${challengeId}`]: { $lt: twentyFourHoursAgo } }
+            ]
+          },
           {
             $inc: incData,
-            $addToSet: { completedChallenges: challengeId }
-          }
+            $addToSet: { completedChallenges: challengeId },
+            $set: { [`challengeCompletions.${challengeId}`]: new Date() }
+          },
+          { new: true } // Return updated doc
         );
+
+        if (!updatedUser) {
+          // Could mean user not found, OR they are still in cooldown.
+          // To be safe, we reject if we couldn't update.
+          return NextResponse.json({
+            isApproved: false,
+            reason: 'Challenge is still in cooldown or user not found. Please try again later.'
+          }, { status: 400 });
+        }
       }
 
       return NextResponse.json({
