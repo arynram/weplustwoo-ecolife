@@ -104,7 +104,20 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center bg-[#022c22]">
+    <main className="flex min-h-screen flex-col items-center bg-[#022c22] relative">
+      <div className="absolute top-6 left-6 z-50">
+        <button 
+          onClick={() => {
+            router.push('/');
+            setTimeout(() => {
+              window.scrollTo({ top: 0, behavior: 'instant' });
+            }, 50);
+          }}
+          className="flex items-center gap-2 text-emerald-400 hover:text-emerald-300 font-bold bg-white/5 hover:bg-white/10 px-6 py-3 rounded-full transition-colors border border-emerald-500/30 active:scale-95 shadow-md"
+        >
+          ← Back to Dashboard
+        </button>
+      </div>
       
       <div className="flex-1 flex items-center justify-center w-full px-4 pt-32 pb-12">
         <div className="w-full max-w-md glass-dark p-8 rounded-2xl border border-white/10 shadow-2xl">

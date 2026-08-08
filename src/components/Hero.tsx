@@ -65,15 +65,6 @@ export function Hero() {
 
       {/* Content */}
       <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1, ease: "easeOut" }}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-8"
-        >
-          <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-ping"></span>
-          <span className="text-sm font-medium text-emerald-100">Award-winning Sustainable Dashboard</span>
-        </motion.div>
 
         <motion.h1 
           initial={{ opacity: 0, y: 50 }}

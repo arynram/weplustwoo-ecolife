@@ -90,7 +90,12 @@ const LEVELS: Record<string, LevelConfig> = {
 // --- Custom SVG Components for Diorama Graphics ---
 
 const TreeSprite = ({ isRestored }: { isRestored: boolean }) => (
-  <svg viewBox="0 0 100 120" className="w-16 h-20 md:w-24 md:h-32 drop-shadow-xl overflow-visible">
+  <motion.svg 
+    viewBox="0 0 100 120" 
+    className="w-16 h-20 md:w-24 md:h-32 drop-shadow-xl overflow-visible origin-bottom"
+    animate={!isRestored ? { rotate: [-1.5, 1.5, -1.5], scale: [1, 1.02, 1] } : {}}
+    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+  >
     {/* Trunk */}
     <path d="M 45 120 C 45 100, 40 80, 50 60 C 60 80, 55 100, 55 120 Z" fill={isRestored ? "#78350f" : "#451a03"} />
     <path d="M 50 80 C 40 70, 30 65, 25 60" stroke={isRestored ? "#78350f" : "#451a03"} strokeWidth="4" fill="none" strokeLinecap="round" />
@@ -108,7 +113,7 @@ const TreeSprite = ({ isRestored }: { isRestored: boolean }) => (
       <circle cx="70" cy="50" r="25" fill="#166534" />
       <circle cx="50" cy="20" r="25" fill="#22c55e" />
     </motion.g>
-  </svg>
+  </motion.svg>
 );
 
 const PondSprite = ({ isRestored }: { isRestored: boolean }) => (

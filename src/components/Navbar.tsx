@@ -1,15 +1,18 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Leaf, Menu, X, Globe, Trophy, UserCircle, LogOut } from 'lucide-react';
+import { Leaf, Trophy, UserCircle, LogOut } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import { motion } from 'framer-motion';
 import { useSession, signOut } from 'next-auth/react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 export function Navbar() {
+  const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
+  const [isPastDashboard, setIsPastDashboard] = useState(false);
+
   const [showProfile, setShowProfile] = useState(false);
   const [mounted, setMounted] = useState(false);
   const { ecoScore, xp, reset, updateStats } = useStore();
@@ -19,7 +22,9 @@ export function Navbar() {
     setMounted(true);
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
+      setIsPastDashboard(window.scrollY > window.innerHeight * 0.4);
     };
+    handleScroll(); // Check initial state
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -68,12 +73,14 @@ export function Navbar() {
     }
   }, [session?.user, updateStats]);
 
+  const isVisible = pathname === '/' && !isPastDashboard;
+
   return (
     <motion.nav 
       initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.8, ease: "easeOut" }}
-      className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled ? 'glass-dark py-4' : 'bg-transparent py-6'}`}
+      animate={{ y: isVisible ? 0 : -100 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+      className={`fixed top-0 w-full z-50 transition-colors duration-300 ${scrolled ? 'glass-dark py-4' : 'bg-transparent py-6'} ${!isVisible ? 'pointer-events-none' : ''}`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center">
@@ -89,15 +96,9 @@ export function Navbar() {
             </span>
           </div>
 
-          <div className="hidden lg:flex items-center space-x-6">
-            <NavLink href="/#dashboard">Dashboard</NavLink>
-            <NavLink href="/#map">Eco Map</NavLink>
-            <NavLink href="/#challenges">Challenges</NavLink>
-            <NavLink href="/#calculator">Calculator</NavLink>
-            <NavLink href="/leaderboard">Leaderboard</NavLink>
-          </div>
+          {/* Navigation row removed per user request */}
             
-          <div className="hidden md:flex items-center gap-3">
+          <div className="flex items-center gap-3">
             <div className="flex items-center gap-3 bg-white/5 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 shadow-lg">
               <span className="text-sm font-bold text-white bg-white/10 px-3 py-1 rounded-full border border-white/10">
                 {mounted ? ecoScore : 0} <span className="text-emerald-400">Pts</span>
@@ -129,54 +130,9 @@ export function Navbar() {
               </Link>
             )}
           </div>
-
-          <div className="md:hidden flex items-center">
-            <button onClick={() => setIsOpen(!isOpen)} className="text-white hover:text-emerald-400 transition-colors">
-              {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </button>
-          </div>
         </div>
       </div>
 
-      {/* Mobile menu */}
-      {isOpen && (
-        <motion.div 
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
-          className="md:hidden glass-dark border-t border-white/10"
-        >
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            <MobileNavLink href="/#dashboard" onClick={() => setIsOpen(false)}>Dashboard</MobileNavLink>
-            <MobileNavLink href="/#map" onClick={() => setIsOpen(false)}>Eco Map</MobileNavLink>
-            <MobileNavLink href="/#challenges" onClick={() => setIsOpen(false)}>Challenges</MobileNavLink>
-            <MobileNavLink href="/#calculator" onClick={() => setIsOpen(false)}>Calculator</MobileNavLink>
-            <MobileNavLink href="/leaderboard" onClick={() => setIsOpen(false)}>Leaderboard</MobileNavLink>
-            
-            {session ? (
-              <div className="flex items-center gap-4 mt-2 px-3">
-                <Link href="/account" onClick={() => setIsOpen(false)} className="flex items-center gap-2 text-emerald-400 hover:text-emerald-300 font-medium">
-                  <UserCircle className="w-5 h-5" /> Profile
-                </Link>
-                <button onClick={() => { reset(); signOut(); setIsOpen(false); }} className="flex items-center gap-2 text-red-400 hover:text-red-300 font-medium">
-                  <LogOut className="w-5 h-5" /> Logout
-                </button>
-              </div>
-            ) : (
-              <MobileNavLink href="/login" onClick={() => setIsOpen(false)}>Login</MobileNavLink>
-            )}
-            <div className="flex items-center gap-6 p-4 mt-4 bg-white/5 rounded-2xl border border-white/5">
-              <div className="flex items-center gap-2">
-                <Globe className="h-5 w-5 text-emerald-400" />
-                <span className="font-bold text-white">{ecoScore} Score</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Trophy className="h-5 w-5 text-yellow-400" />
-                <span className="font-bold text-white">{xp} EP</span>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-      )}
     </motion.nav>
   );
 }
@@ -193,14 +149,4 @@ function NavLink({ href, children }: { href: string, children: React.ReactNode }
   );
 }
 
-function MobileNavLink({ href, onClick, children }: { href: string, onClick: () => void, children: React.ReactNode }) {
-  return (
-    <Link 
-      href={href} 
-      onClick={onClick}
-      className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-white/5 transition-colors"
-    >
-      {children}
-    </Link>
-  );
-}
+

@@ -3,16 +3,17 @@
 import { useState, useEffect, useRef } from 'react';
 import { useStore } from '@/store/useStore';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Sky, Html, Float, Line } from '@react-three/drei';
+import { OrbitControls, Sky, Html, Line } from '@react-three/drei';
 import * as THREE from 'three';
-import { MapPin, TreePine, Sun, Wind, Lock, Navigation } from 'lucide-react';
+import { MapPin, TreePine, Sun, Wind, Navigation, Maximize, Minimize, Plus, Minus, Zap } from 'lucide-react';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
 import RestorationLevel from './RestorationLevel';
+import { Challenges } from './Challenges';
 
 const MAP_LOCATIONS = [
   { id: 'home', name: '🏡 Happy Village', pos: [7, 1, 7], icon: <MapPin />, reqXp: 0, description: 'Your cozy starting point! Learn fun eco habits here.' },
-  { id: 'forest', name: '🌳 Magic Forest', pos: [-6, 3, 6], icon: <TreePine />, reqXp: 50, description: 'A wonderful green forest protected by your super eco powers!' },
-  { id: 'solar', name: '☀️ Sunny City', pos: [-5, 6, -5], icon: <Sun />, reqXp: 150, description: 'A super cool city that gets all its energy from the bright sun!' },
+  { id: 'forest', name: '🌳 Polluted Village', pos: [-6, 3, 6], icon: <TreePine />, reqXp: 50, description: 'A village that needs your help to clean up pollution.' },
+  { id: 'solar', name: '☀️ Industrial Area', pos: [-5, 6, -5], icon: <Sun />, reqXp: 150, description: 'Upgrade the factories with clean technology!' },
   { id: 'wind', name: '💨 Breezy Valley', pos: [3, 9, -3], icon: <Wind />, reqXp: 300, description: 'Giant windmills spinning in the sky making clean power!' }
 ];
 
@@ -76,14 +77,14 @@ function Player({ lifetimeXp }: { lifetimeXp: number }) {
     // Rotate character to face center mountain slightly
     ref.current.lookAt(0, targetPos.y, 0);
 
-    // Add a simple walking bounce animation if moving or just a slight breathe
+    // Subtle breathing/idle animation instead of aggressive bouncing
     const time = state.clock.getElapsedTime();
-    ref.current.position.y += Math.sin(time * 5) * 0.1;
+    ref.current.position.y += Math.sin(time * 2) * 0.02;
   });
 
   return (
     <group ref={ref} scale={0.4} position={[7, 1.5, 7]}>
-      {/* Head (Bigger for a boy-like proportion) */}
+      {/* Head */}
       <mesh position={[0, 1.4, 0]}>
         <sphereGeometry args={[0.5, 16, 16]} />
         <meshStandardMaterial color="#fca5a5" />
@@ -121,7 +122,7 @@ function Player({ lifetimeXp }: { lifetimeXp: number }) {
         <meshStandardMaterial color="#fca5a5" />
       </mesh>
       
-      {/* Legs (Shorter) */}
+      {/* Legs */}
       <mesh position={[-0.2, -0.3, 0]}>
         <boxGeometry args={[0.25, 0.7, 0.25]} />
         <meshStandardMaterial color="#1e3a8a" />
@@ -183,32 +184,139 @@ function Scene({ selectedLocation, setSelectedLocation, unlockedAreas }: any) {
   );
 }
 
-export function EcoMap() {
-  const { xp, lifetimeXp, unlockedAreas, unlockArea } = useStore();
+export function EcoMap({ forceFullscreen = false }: { forceFullscreen?: boolean }) {
+  const { xp, lifetimeXp, unlockedAreas } = useStore();
   const [selectedLocation, setSelectedLocation] = useState<typeof MAP_LOCATIONS[0] | null>(null);
   const [activeLevel, setActiveLevel] = useState<string | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showFullscreenChallenges, setShowFullscreenChallenges] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
   
   const currentLifetime = lifetimeXp ?? xp; // Fallback for migration
   
   const ref = useRef(null);
   const isInView = useInView(ref, { margin: "200px" });
 
+  const handleZoom = (deltaY: number) => {
+    const el = document.querySelector('#eco-map-canvas canvas');
+    if (el) el.dispatchEvent(new WheelEvent('wheel', { deltaY, bubbles: true }));
+  };
+
+  const isEffectivelyFullscreen = isFullscreen || forceFullscreen;
+
+  useEffect(() => {
+    if (isEffectivelyFullscreen) {
+      document.body.style.overflow = 'hidden';
+      setIsFocused(true);
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isEffectivelyFullscreen]);
+
+
   return (
-    <div ref={ref} className="w-full h-125 md:h-150 relative rounded-[3rem] overflow-hidden border-4 border-sky-300 shadow-[0_10px_40px_-10px_rgba(56,189,248,0.5)] bg-sky-200">
+    <div 
+      ref={ref} 
+      onMouseLeave={() => !isEffectivelyFullscreen && setIsFocused(false)}
+      className={`${isFullscreen ? 'fixed inset-0 z-[100] rounded-none' : forceFullscreen ? 'w-full h-full rounded-none' : 'h-125 md:h-150 relative rounded-[3rem]'} w-full overflow-hidden border-4 border-sky-300 shadow-[0_10px_40px_-10px_rgba(56,189,248,0.5)] bg-sky-200 transition-all duration-500`}
+    >
+      <div className={`absolute inset-0 transition-opacity duration-300 ${showFullscreenChallenges ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
       
+      {/* Click to Interact Overlay to prevent scroll hijacking */}
+      {!isFocused && !isFullscreen && (
+        <div 
+          className="absolute inset-0 z-30 bg-black/5 flex items-center justify-center cursor-pointer backdrop-blur-[1px] hover:bg-black/10 transition-colors"
+          onClick={() => setIsFocused(true)}
+        >
+          <div className="bg-white/95 px-8 py-4 rounded-full font-bold text-sky-700 shadow-xl border-2 border-sky-200 flex items-center gap-3">
+            <Navigation className="w-5 h-5 text-sky-500" />
+            Click to interact with the map
+          </div>
+        </div>
+      )}
+
       {/* UI Overlay */}
-      <div className="absolute top-6 left-6 z-20 bg-white/90 backdrop-blur-md px-6 py-3 rounded-full flex items-center gap-3 shadow-lg border-2 border-sky-100">
+      <div className={`absolute top-6 left-6 z-20 bg-white/90 backdrop-blur-md px-6 py-3 rounded-full flex items-center gap-3 shadow-lg border-2 border-sky-100 transition-opacity ${isFocused || isFullscreen ? 'opacity-100' : 'opacity-0'}`}>
         <Navigation className="w-6 h-6 text-sky-500 animate-bounce" />
         <span className="font-bold text-sky-700 text-lg">Drag to rotate the 3D map! 🗺️</span>
       </div>
 
-      {isInView && (
-        <Canvas shadows camera={{ position: [0, 8, 20], fov: 50 }}>
-          <OrbitControls enablePan={false} minDistance={10} maxDistance={30} maxPolarAngle={Math.PI / 2 + 0.1} />
-          <Scene selectedLocation={selectedLocation} setSelectedLocation={setSelectedLocation} unlockedAreas={unlockedAreas} />
-          <Player lifetimeXp={currentLifetime} />
-        </Canvas>
-      )}
+      {/* EP HUD in Fullscreen */}
+      <AnimatePresence>
+        {isFullscreen && (
+          <motion.div 
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 50 }}
+            className="absolute top-6 right-6 z-20 flex flex-col items-end gap-3"
+          >
+            <div className="bg-white/95 backdrop-blur-md px-6 py-3 rounded-2xl shadow-xl border-2 border-emerald-300 flex items-center gap-3">
+              <Zap className="w-7 h-7 text-yellow-400 fill-yellow-400" />
+              <span className="font-black text-3xl text-emerald-800">EP: {xp}</span>
+            </div>
+            <button 
+              onClick={() => setShowFullscreenChallenges(true)}
+              className="bg-emerald-500 hover:bg-emerald-400 text-white font-extrabold py-3 px-6 rounded-xl shadow-[0_0_15px_rgba(16,185,129,0.4)] hover:shadow-[0_0_25px_rgba(16,185,129,0.6)] transition-all hover:-translate-y-1 active:scale-95 border border-emerald-400 flex items-center gap-2"
+            >
+              Earn More Energy Points ➔
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Zoom & Fullscreen Controls */}
+      <div className={`absolute bottom-6 right-6 z-20 flex flex-col gap-3 transition-opacity ${isFocused || isFullscreen ? 'opacity-100' : 'opacity-0'}`}>
+        <div className="flex flex-col bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border-2 border-sky-200 overflow-hidden">
+          <button 
+            onClick={() => handleZoom(-200)}
+            className="p-3 hover:bg-sky-100 text-sky-700 transition-colors border-b border-sky-100"
+            title="Zoom In"
+          >
+            <Plus className="w-6 h-6" />
+          </button>
+          <button 
+            onClick={() => handleZoom(200)}
+            className="p-3 hover:bg-sky-100 text-sky-700 transition-colors"
+            title="Zoom Out"
+          >
+            <Minus className="w-6 h-6" />
+          </button>
+        </div>
+        
+        {!forceFullscreen && (
+          <button 
+            onClick={() => {
+              if (isFullscreen) {
+                window.scrollTo({ top: 0, behavior: 'instant' });
+              }
+              setIsFullscreen(!isFullscreen);
+            }}
+            className="p-4 bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border-2 border-sky-200 hover:bg-sky-100 text-sky-700 transition-all hover:scale-105 active:scale-95"
+            title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+          >
+            {isFullscreen ? <Minimize className="w-6 h-6" /> : <Maximize className="w-6 h-6" />}
+          </button>
+        )}
+      </div>
+
+      <div id="eco-map-canvas" className="w-full h-full">
+        {isInView && (
+          <Canvas shadows camera={{ position: [0, 8, 20], fov: 50 }}>
+            <OrbitControls 
+              enablePan={false} 
+              minDistance={10} 
+              maxDistance={30} 
+              maxPolarAngle={Math.PI / 2 + 0.1}
+              enableZoom={isFocused || isFullscreen} // Prevent scroll hijack
+            />
+            <Scene selectedLocation={selectedLocation} setSelectedLocation={setSelectedLocation} unlockedAreas={unlockedAreas} />
+            <Player lifetimeXp={currentLifetime} />
+          </Canvas>
+        )}
+      </div>
 
       {/* Selected Location Modal */}
       <AnimatePresence>
@@ -217,7 +325,7 @@ export function EcoMap() {
             initial={{ opacity: 0, y: 40, scale: 0.8 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 40, scale: 0.8 }}
-            className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 bg-white p-6 rounded-4xl w-[90%] max-w-md border-4 border-sky-300 shadow-2xl"
+            className={`absolute bottom-6 left-1/2 -translate-x-1/2 z-20 bg-white p-6 rounded-4xl w-[90%] max-w-md border-4 border-sky-300 shadow-2xl ${isFullscreen ? 'bottom-12' : ''}`}
           >
             <div className="flex justify-between items-start mb-2">
               <h3 className="text-2xl font-extrabold text-sky-600 flex items-center gap-3">
@@ -249,6 +357,36 @@ export function EcoMap() {
               setActiveLevel(nextId);
             }}
           />
+        )}
+      </AnimatePresence>
+      </div>
+
+      {/* Fullscreen Challenges Overlay */}
+      <AnimatePresence>
+        {showFullscreenChallenges && (
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="fixed inset-0 z-[200] bg-[#022c22] overflow-y-auto"
+          >
+            <div className="sticky top-0 z-10 bg-[#022c22]/90 backdrop-blur-md p-6 border-b border-white/10 flex justify-between items-center shadow-md">
+              <button 
+                onClick={() => setShowFullscreenChallenges(false)}
+                className="flex items-center gap-2 text-emerald-400 hover:text-emerald-300 font-bold bg-white/5 hover:bg-white/10 px-6 py-3 rounded-full transition-colors border border-emerald-500/30 active:scale-95"
+              >
+                ← Back to Eco Map
+              </button>
+              <div className="flex items-center gap-2 bg-white/5 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 shadow-lg">
+                <Zap className="w-5 h-5 text-yellow-400 fill-yellow-400" />
+                <span className="font-bold text-emerald-100">{xp} EP</span>
+              </div>
+            </div>
+            
+            <div className="max-w-7xl mx-auto p-6 pt-10 pb-20">
+               <Challenges />
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>
