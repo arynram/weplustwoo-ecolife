@@ -7,6 +7,7 @@ type LeaderUser = {
   id: string;
   name: string;
   score: number;
+  level: number;
   avatar: string;
   rank: number;
 };
