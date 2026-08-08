@@ -11,6 +11,16 @@ export async function POST(req: NextRequest) {
     const email = formData.get('email') as string;
     const xp = parseInt(formData.get('xp') as string || '0');
 
+    const envRewardsStr = formData.get('envRewards') as string;
+    let envRewards = {};
+    if (envRewardsStr) {
+      try {
+        envRewards = JSON.parse(envRewardsStr);
+      } catch (e) {
+        console.error('Failed to parse envRewards', e);
+      }
+    }
+
     if (!video || !challengeTitle) {
       return NextResponse.json(
         { message: 'Video and challengeTitle are required.' },
@@ -29,8 +39,19 @@ export async function POST(req: NextRequest) {
     if (isApproved) {
       if (email && xp > 0) {
         await connectToDatabase();
+        
+        // Build the $inc object dynamically
+        const incData: any = { score: xp };
+        if (envRewards && Object.keys(envRewards).length > 0) {
+          for (const [key, val] of Object.entries(envRewards)) {
+            if (['carbonSaved', 'treesSaved', 'waterSaved', 'plasticReduced'].includes(key)) {
+              incData[key] = val;
+            }
+          }
+        }
+
         await User.findOneAndUpdate({ email }, { 
-          $inc: { score: xp },
+          $inc: incData,
           $addToSet: { completedChallenges: challengeId }
         });
       }

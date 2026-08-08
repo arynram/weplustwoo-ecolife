@@ -13,6 +13,10 @@ export interface IUser extends Document {
   otpExpiry?: Date;
   completedChallenges: string[];
   unlockedAreas: string[];
+  carbonSaved: number;
+  treesSaved: number;
+  waterSaved: number;
+  plasticReduced: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -67,6 +71,10 @@ const UserSchema = new Schema<IUser>(
       type: Boolean,
       default: false,
     },
+    carbonSaved: { type: Number, default: 0 },
+    treesSaved: { type: Number, default: 0 },
+    waterSaved: { type: Number, default: 0 },
+    plasticReduced: { type: Number, default: 0 },
     otp: {
       type: String,
       select: false,

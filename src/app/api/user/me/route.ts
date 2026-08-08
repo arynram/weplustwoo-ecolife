@@ -29,6 +29,10 @@ export async function POST(req: Request) {
       score: user.score,
       completedChallenges: user.completedChallenges || [],
       unlockedAreas: user.unlockedAreas || ['home'],
+      carbonSaved: user.carbonSaved || 0,
+      treesSaved: user.treesSaved || 0,
+      waterSaved: user.waterSaved || 0,
+      plasticReduced: user.plasticReduced || 0,
     });
   } catch (error) {
     return NextResponse.json({ message: 'Internal error' }, { status: 500 });

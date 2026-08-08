@@ -38,6 +38,7 @@ export const sendOTP = async (email: string, otp: string) => {
     }
   } catch (error) {
     console.error('Error sending OTP email:', error);
-    throw new Error('Failed to send verification email');
+    // @ts-ignore
+    throw new Error(`Failed to send verification email: ${error.message || error}`);
   }
 };

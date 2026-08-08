@@ -48,7 +48,11 @@ export function Navbar() {
                 xp: data.score,
                 ecoScore: Math.floor(data.score / 100),
                 completedChallenges: data.completedChallenges,
-                unlockedAreas: data.unlockedAreas
+                unlockedAreas: data.unlockedAreas,
+                carbonSaved: data.carbonSaved || 0,
+                treesSaved: data.treesSaved || 0,
+                waterSaved: data.waterSaved || 0,
+                plasticReduced: data.plasticReduced || 0,
               });
             }
           }
@@ -82,10 +86,10 @@ export function Navbar() {
           </div>
 
           <div className="hidden lg:flex items-center space-x-6">
-            <NavLink href="/#calculator">Calculator</NavLink>
             <NavLink href="/#dashboard">Dashboard</NavLink>
-            <NavLink href="/#challenges">Challenges</NavLink>
             <NavLink href="/#map">Eco Map</NavLink>
+            <NavLink href="/#challenges">Challenges</NavLink>
+            <NavLink href="/#calculator">Calculator</NavLink>
             <NavLink href="/leaderboard">Leaderboard</NavLink>
           </div>
             
@@ -138,10 +142,10 @@ export function Navbar() {
           className="md:hidden glass-dark border-t border-white/10"
         >
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            <MobileNavLink href="/#calculator" onClick={() => setIsOpen(false)}>Calculator</MobileNavLink>
             <MobileNavLink href="/#dashboard" onClick={() => setIsOpen(false)}>Dashboard</MobileNavLink>
-            <MobileNavLink href="/#challenges" onClick={() => setIsOpen(false)}>Challenges</MobileNavLink>
             <MobileNavLink href="/#map" onClick={() => setIsOpen(false)}>Eco Map</MobileNavLink>
+            <MobileNavLink href="/#challenges" onClick={() => setIsOpen(false)}>Challenges</MobileNavLink>
+            <MobileNavLink href="/#calculator" onClick={() => setIsOpen(false)}>Calculator</MobileNavLink>
             <MobileNavLink href="/leaderboard" onClick={() => setIsOpen(false)}>Leaderboard</MobileNavLink>
             
             {session ? (

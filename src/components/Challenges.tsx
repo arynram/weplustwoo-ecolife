@@ -7,12 +7,12 @@ import { Bike, TreeDeciduous, LightbulbOff, Trash2, Droplet, Recycle, CheckCircl
 import { useState } from 'react';
 
 const CHALLENGES_DATA = [
-  { id: 'bike', title: 'Ride a Bicycle', xp: 20, icon: <Bike className="w-8 h-8" />, desc: 'Use a bicycle for your daily commute instead of a car.', reqRank: 0, question: 'How many kilometers did you ride today?' },
-  { id: 'tree', title: 'Plant a Tree', xp: 50, icon: <TreeDeciduous className="w-8 h-8" />, desc: 'Plant a tree in your local community or garden.', reqRank: 0, question: 'What type of tree did you plant?' },
-  { id: 'light', title: 'Save Electricity', xp: 15, icon: <LightbulbOff className="w-8 h-8" />, desc: 'Turn off all unnecessary lights for 24 hours.', reqRank: 0, question: 'Which appliances did you unplug?' },
-  { id: 'plastic', title: 'Avoid Plastic', xp: 30, icon: <Trash2 className="w-8 h-8" />, desc: 'Go completely single-use plastic free for 3 days.', reqRank: 100, question: 'What alternatives to plastic did you use?' },
-  { id: 'water', title: 'Save Water', xp: 25, icon: <Droplet className="w-8 h-8" />, desc: 'Limit your showers to 5 minutes for a week.', reqRank: 100, question: 'How many liters of water do you estimate you saved?' },
-  { id: 'recycle', title: 'Recycle Waste', xp: 35, icon: <Recycle className="w-8 h-8" />, desc: 'Properly segregate and recycle all household waste.', reqRank: 200, question: 'What materials did you segregate today?' },
+  { id: 'bike', title: 'Ride a Bicycle', xp: 20, envRewards: { carbonSaved: 5 }, icon: <Bike className="w-8 h-8" />, desc: 'Use a bicycle for your daily commute instead of a car.', reqRank: 0, question: 'How many kilometers did you ride today?' },
+  { id: 'tree', title: 'Plant a Tree', xp: 50, envRewards: { treesSaved: 1 }, icon: <TreeDeciduous className="w-8 h-8" />, desc: 'Plant a tree in your local community or garden.', reqRank: 0, question: 'What type of tree did you plant?' },
+  { id: 'light', title: 'Save Electricity', xp: 15, envRewards: { carbonSaved: 2 }, icon: <LightbulbOff className="w-8 h-8" />, desc: 'Turn off all unnecessary lights for 24 hours.', reqRank: 0, question: 'Which appliances did you unplug?' },
+  { id: 'plastic', title: 'Avoid Plastic', xp: 30, envRewards: { plasticReduced: 3 }, icon: <Trash2 className="w-8 h-8" />, desc: 'Go completely single-use plastic free for 3 days.', reqRank: 100, question: 'What alternatives to plastic did you use?' },
+  { id: 'water', title: 'Save Water', xp: 25, envRewards: { waterSaved: 50 }, icon: <Droplet className="w-8 h-8" />, desc: 'Limit your showers to 5 minutes for a week.', reqRank: 100, question: 'How many liters of water do you estimate you saved?' },
+  { id: 'recycle', title: 'Recycle Waste', xp: 35, envRewards: { plasticReduced: 5 }, icon: <Recycle className="w-8 h-8" />, desc: 'Properly segregate and recycle all household waste.', reqRank: 200, question: 'What materials did you segregate today?' },
 ];
 
 export function Challenges() {
@@ -45,6 +45,9 @@ export function Challenges() {
         formData.append('email', session.user.email);
       }
       formData.append('xp', activeChallenge.xp.toString());
+      if (activeChallenge.envRewards) {
+        formData.append('envRewards', JSON.stringify(activeChallenge.envRewards));
+      }
 
       const res = await fetch('/api/verify-challenge', {
         method: 'POST',
@@ -54,7 +57,7 @@ export function Challenges() {
       const data = await res.json();
 
       if (res.ok && data.isApproved) {
-        completeChallenge(activeChallenge.id, activeChallenge.xp);
+        completeChallenge(activeChallenge.id, activeChallenge.xp, activeChallenge.envRewards);
         setShowConfetti(activeChallenge.id);
         setTimeout(() => setShowConfetti(null), 2000);
         setActiveChallenge(null);
